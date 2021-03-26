@@ -25,6 +25,8 @@ NOTICE: If you attended the last meeting, you can skip steps 1/2 (downloading an
 
 
 USECASES
+-----------
+
 User X has a receipt. He scans the receipt, and some of the items are missing. He inputs in the missing items, and the items are 
 stored in an inventory, along with his userID, and a timestamp. He wants a recipe, and using the items from the inventory, we recommend for him to make soup. We remove the items from his inventory
 
