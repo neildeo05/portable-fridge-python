@@ -20,6 +20,8 @@ NOTICE: If you attended the last meeting, you can skip steps 1/2 (downloading an
     - Click on generate private key, and wait for the install to finish
     - Move the resulting json file to your project directory
     - Change the name to private-key.json
+3. Creating a python script
+    - This will be done in the meeting. If you miss the meeting, please contact Neil or Arihan to get the details
 
 
 
