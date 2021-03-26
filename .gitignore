@@ -3,3 +3,4 @@ privKey.json
 *.swo
 __pyccache__/
 .DS_Store/
+.mypy_cache
