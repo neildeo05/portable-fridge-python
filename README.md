@@ -31,6 +31,7 @@ stored in an inventory, along with his userID, and a timestamp. He wants a recip
 
 DATA MODEL (for now)
 ----------
+```
 User Collection
   L Information document
     L userid
@@ -46,4 +47,4 @@ Inventory
     L [items]
     L timeCreated
 
-
+```
