@@ -1,0 +1,5 @@
+privKey.json
+*.swp
+*.swo
+__pyccache__/
+.DS_Store/
