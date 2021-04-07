@@ -71,6 +71,31 @@ def uploadImage():
     Image.fromarray(image).save('buff.jpg')
     ocr.main()
     return jsonify({'status': True})
+# Inventory API
+@app.route('/updateItems', methods=['POST', 'PUT'])
+def addItems():
+    try:
+        iid = request.json['id']
+        if iid:
+            db.collection('inventory').document(iid).update(request.json)
+            return jsonify({'status': True}), 200
+        else:
+            print('Please follow schema for inventory items')
+            return jsonify({'status': False}), 404
+    except Exception as e:
+        print(e)
+
+@app.route('/getInventory', methods=['GET'])
+def getInventory():
+    try:
+        iid = request.args.get('id')
+        if iid:
+            user = db.collection('inventory').document(iid).get()
+            return (jsonify(user.to_dict()), 200)
+        else:
+            return jsonify([doc.to_dict() for doc in db.collection('inventory').stream()])
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
