@@ -1,12 +1,16 @@
+import base64
+import io
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
 from firebase_admin import credentials, firestore, initialize_app
 from flask import Flask, jsonify, request
+from PIL import Image
+
+from receipt_scanner.src import ocr
 
 app = Flask(__name__)
-CRED = credentials.Certificate("privkey.json")
-initialize_app(credential=CRED, options={'projectId': 'portable-fridge-c194f'})
-db = firestore.client()
-
-
 @app.route("/createProfile", methods=['POST'])
 def createProfile():
     try:
@@ -58,8 +62,20 @@ def deleteProfile():
     except Exception as e:
         return f"An Error Occured: {e}"
 
+# Scanner API
+@app.route('/uploadImage', methods=['POST'])
+def uploadImage():
+    byteImage = base64.b64decode(request.form.to_dict()['image'])
+    image = Image.open(io.BytesIO(byteImage))
+    image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
+    Image.fromarray(image).save('buff.jpg')
+    ocr.main()
+    return jsonify({'status': True})
+
 
 if __name__ == "__main__":
-    print(db.collection('users').document(
-        'mA5mfS5KW6Dk5tkMEoqb').get().to_dict())
+    CRED = credentials.Certificate("privkey.json")
+    initialize_app(credential=CRED, options={
+                   'projectId': 'portable-fridge-c194f'})
+    db = firestore.client()
     app.run()
