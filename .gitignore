@@ -9,7 +9,7 @@
 privKey.json
 *.swp
 *.swo
-__pyccache__/
+__pycache__/
 .DS_Store/
 .mypy_cache
 test/
