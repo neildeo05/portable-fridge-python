@@ -6,16 +6,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 from firebase_admin import credentials, firestore, initialize_app
 from flask import Flask, jsonify, request
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                get_jwt_identity, jwt_required)
 from PIL import Image
 
+import spec
 from receipt_scanner.src import ocr
 
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = "7479f7fc-66cb-4a01-950a-b30b5807f8bf"
+jwt = JWTManager(app)
+
+
+@app.route('/getToken', methods=["POST"])
+def auth():
+    username = request.json['username']
+    passw = request.json['password']
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
+
+
 @app.route("/createProfile", methods=['POST'])
+@jwt_required()
 def createProfile():
+    current_user = get_jwt_identity()
     try:
         uid = request.json['id']
-        print(uid)
         if uid:
             db.collection('users').document(uid).set(request.json)
             return jsonify({"status": True}), 200
@@ -26,7 +42,9 @@ def createProfile():
 
 
 @app.route('/getProfile', methods=['GET'])
+@jwt_required()
 def getProfile():
+    current_user = get_jwt_identity()
     try:
         uid = request.args.get('id')
         print(uid)
@@ -40,7 +58,9 @@ def getProfile():
 
 
 @app.route('/updateProfile', methods=['POST', 'PUT'])
+@jwt_required()
 def updateProfile():
+    current_user = get_jwt_identity()
     try:
         uid = request.json['id']
         print(uid)
@@ -54,7 +74,9 @@ def updateProfile():
 
 
 @app.route('/deleteProfile', methods=['GET', 'DELETE'])
+@jwt_required()
 def deleteProfile():
+    current_user = get_jwt_identity()
     try:
         uid = request.args.get('id')
         db.collection("users").document(uid).delete()
