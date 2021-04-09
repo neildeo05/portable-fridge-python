@@ -16,7 +16,6 @@ except Exception as e:
     FILENAME = 'buff.jpg'
     OUTPUT_FILENAME = 'out.jpg'
 original = cv2.imread(FILENAME)
-print(original)
 
 
 class Scanner:
