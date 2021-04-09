@@ -13,4 +13,5 @@ privKey.json
 __pycache__/
 .DS_Store/
 .mypy_cache
+receipt_scanner/src/__pycache__/
 test/
