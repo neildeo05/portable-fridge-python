@@ -86,20 +86,26 @@ def deleteProfile():
 
 # Scanner API
 @app.route('/uploadImage', methods=['POST'])
+@jwt_required()
 def uploadImage():
+    current_user = get_jwt_identity()
     byteImage = base64.b64decode(request.form.to_dict()['image'])
     image = Image.open(io.BytesIO(byteImage))
     image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
     Image.fromarray(image).save('buff.jpg')
     ocr.main()
+
     return jsonify({'status': True})
 # Inventory API
 @app.route('/updateItems', methods=['POST', 'PUT'])
+@jwt_required()
 def addItems():
+    current_user = get_jwt_identity()
     try:
-        iid = request.json['id']
-        if iid:
-            db.collection('inventory').document(iid).update(request.json)
+        uid = request.json['uid']
+        if uid:
+            [t.update(request.json) for t in db.collection(
+                'user').document(uid).collection('inventory').stream()]
             return jsonify({'status': True}), 200
         else:
             print('Please follow schema for inventory items')
@@ -107,15 +113,88 @@ def addItems():
     except Exception as e:
         print(e)
 
+
 @app.route('/getInventory', methods=['GET'])
+@jwt_required()
 def getInventory():
+    current_user = get_jwt_identity()
     try:
-        iid = request.args.get('id')
-        if iid:
-            user = db.collection('inventory').document(iid).get()
-            return (jsonify(user.to_dict()), 200)
+        uid = request.args.get('id')
+        return jsonify(
+            [doc.to_dict() for doc in db.collection('users').document(
+                uid).collection('inventory').stream()]
+        )
+    except Exception as e:
+        print(e)
+
+
+# recipes
+@app.route('/getCommunityRecipes', methods=['GET'])
+@jwt_required()
+def getCommunityRecipes():
+    current_user = get_jwt_identity()
+    try:
+        uid = request.args.get('id')
+        if uid:
+            user_ref = db.collection('users')
+            user_doc = user_ref.document(uid)
+            prefs = user_doc.get().to_dict()['preferences']
+            # inv = [i.to_dict()
+            #        for i in user_doc.collection('inventory').stream()]
+            # curr_inv = inv[0]
+            all_recipes = [i.to_dict()
+                           for i in db.collection('recipe').stream()]
+            return (jsonify({"recipes": all_recipes}), 200)
+    except Exception as e:
+        print(e)
+
+
+@app.route('/postRecipes', methods=['POST'])
+@jwt_required()
+def createRecipe():
+    current_user = get_jwt_identity()
+    try:
+        rid = request.json['id']
+        if rid:
+            db.collection('recipe').document(rid).set(request.json)
+            return jsonify({"status": True}), 200
         else:
-            return jsonify([doc.to_dict() for doc in db.collection('inventory').stream()])
+            return ("RID not present in request query", 404)
+    except Exception as e:
+        print(e)
+
+
+@app.route('/getRecipes', methods=['GET'])
+@jwt_required()
+def getRecipe():
+    current_user = get_jwt_identity()
+    try:
+        rid = request.args.get('id')
+        if rid:
+            recipe = db.collection('recipe').document(rid).get()
+            return (jsonify(recipe.to_dict()), 200)
+        else:
+            return jsonify([doc.to_dict() for doc in db.collection('recipe').stream()])
+    except Exception as e:
+        print(e)
+
+
+@app.route('/likeRecipe', methods=['POST'])
+@jwt_required()
+def likeRecipe():
+    current_user = get_jwt_identity()
+    try:
+        rid = request.json['id']
+        if rid:
+            prev_likes = db.collection('recipe').document(
+                rid).get().to_dict()['likes']
+            print(prev_likes)
+            db.collection('recipe').document(
+                rid).update({"likes": prev_likes+1})
+            return "True"
+            # db.collection('recipe').document(rid).update({'likes': })
+        print(request.json)
+        return "FALSE"
     except Exception as e:
         print(e)
 
