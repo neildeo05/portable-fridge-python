@@ -1,2 +1,3 @@
 flask
 firebase_admin
+flask-jwt-extended

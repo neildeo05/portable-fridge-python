@@ -8,15 +8,13 @@ from firebase_admin import credentials, firestore, initialize_app
 from flask import Flask, jsonify, request
 from flask_jwt_extended import (JWTManager, create_access_token,
                                 get_jwt_identity, jwt_required)
-from PIL import Image
-
-import spec
-from receipt_scanner.src import ocr
-
+CRED = credentials.Certificate("privkey.json")
+initialize_app(credential=CRED, options={
+           'projectId': 'portablefridge-311105'})
+db = firestore.client()
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "7479f7fc-66cb-4a01-950a-b30b5807f8bf"
 jwt = JWTManager(app)
-
 
 @app.route('/getToken', methods=["POST"])
 def auth():
@@ -85,17 +83,18 @@ def deleteProfile():
         return f"An Error Occured: {e}"
 
 # Scanner API
-@app.route('/uploadImage', methods=['POST'])
-@jwt_required()
-def uploadImage():
-    current_user = get_jwt_identity()
-    byteImage = base64.b64decode(request.form.to_dict()['image'])
-    image = Image.open(io.BytesIO(byteImage))
-    image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
-    Image.fromarray(image).save('buff.jpg')
-    ocr.main()
+# @app.route('/uploadImage', methods=['POST'])
+# @jwt_required()
+# def uploadImage():
+    # current_user = get_jwt_identity()
+    # image has to be b64encoded before sending request
+    # byteImage = base64.b64decode(request.form.to_dict()['image'])
+    # image = Image.open(io.BytesIO(byteImage))
+    # image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
+    # Image.fromarray(image).save('buff.jpg')
+    # ocr.main()
 
-    return jsonify({'status': True})
+    # return jsonify({'status': True})
 # Inventory API
 @app.route('/updateItems', methods=['POST', 'PUT'])
 @jwt_required()
@@ -199,9 +198,5 @@ def likeRecipe():
         print(e)
 
 
-if __name__ == "__main__":
-    CRED = credentials.Certificate("privkey.json")
-    initialize_app(credential=CRED, options={
-                   'projectId': 'portable-fridge-c194f'})
-    db = firestore.client()
-    app.run()
+if __name__ == '__main__':
+    app.run(threaded=True, host='0.0.0.0', port=8080)
