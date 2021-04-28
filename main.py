@@ -1,9 +1,8 @@
 import base64
 import io
-
-import cv2
-import matplotlib.pyplot as plt
-import numpy as np
+# import cv2
+# import matplotlib.pyplot as plt
+# import numpy as np
 from firebase_admin import credentials, firestore, initialize_app
 from flask import Flask, jsonify, request
 from flask_jwt_extended import (JWTManager, create_access_token,
