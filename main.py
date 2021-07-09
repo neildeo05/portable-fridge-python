@@ -7,12 +7,14 @@ from firebase_admin import credentials, firestore, initialize_app
 from flask import Flask, jsonify, request
 from flask_jwt_extended import (JWTManager, create_access_token,
                                 get_jwt_identity, jwt_required)
+from flask_cors import CORS
 CRED = credentials.Certificate("privkey.json")
 initialize_app(credential=CRED, options={
            'projectId': 'portablefridge-311105'})
 db = firestore.client()
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "7479f7fc-66cb-4a01-950a-b30b5807f8bf"
+CORS(app)
 jwt = JWTManager(app)
 
 @app.route('/getToken', methods=["POST"])
